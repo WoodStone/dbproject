@@ -1,9 +1,6 @@
 package dbproject;
 
-import dbproject.command.CommandHandler;
-import dbproject.command.CommandKategori;
-import dbproject.command.CommandLogin;
-import dbproject.command.CommandQuit;
+import dbproject.command.*;
 import dbproject.command.gruppe.CommandGruppe;
 import dbproject.command.logg.CommandLogg;
 
@@ -42,13 +39,12 @@ public class Main {
 
     commandHandler = new CommandHandler();
     commandHandler.registerCommand(new CommandQuit());
-    commandHandler.registerCommand(new CommandLogg());
-    commandHandler.registerCommand(new CommandGruppe());
-    commandHandler.registerCommand(new CommandKategori());
-
-
-
-
+//    commandHandler.registerCommand(new CommandLogg());
+//    commandHandler.registerCommand(new CommandGruppe());
+//    commandHandler.registerCommand(new CommandKategori());
+    commandHandler.registerCommand(new CommandWorkout());
+    commandHandler.registerCommand(new CommandExercise());
+    commandHandler.registerCommand(new CommandLastWeek());
   }
 
   public static void init() {

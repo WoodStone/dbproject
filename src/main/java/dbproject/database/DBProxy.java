@@ -1,9 +1,16 @@
 package dbproject.database;
 
 import dbproject.User;
+import dbproject.core.exercise.Exercise;
+import dbproject.core.exercise.Stamina;
+import dbproject.core.exercise.Strength;
+import dbproject.core.workout.Indoor;
+import dbproject.core.workout.Outdoor;
+import dbproject.core.workout.Workout;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class DBProxy {
@@ -56,8 +63,163 @@ public class DBProxy {
     return kategorier;
   }
 
-  public static void addOvelse(String ovelse) {
+  public static void addExercise(Exercise exercise) {
+    String v1 = "values('" + exercise.NAME + "')";
+    DBConnector.makeStatement("INSERT INTO oevelse(oevelseNavn) " + v1 + ";");
+    if (exercise instanceof Stamina) {
+      Stamina s = (Stamina) exercise;
+      //String v2 = "values('" + stamina.NAME + "'," + stamina.getLength() + "," + stamina.getTime() + ")";
+      String v2 = String.format("values('%s',%d,%d)", s.NAME, s.getLength(), s.getTime());
+      DBConnector.makeStatement("INSERT INTO utholdenhetOevelse(oevelseNavn,distanse,tid) " + v2 + ";");
+    } else {
+      Strength s = (Strength) exercise;
+      String v3 = String.format("values('%s',%d,%d,%d,'%s')", s.NAME, s.getWeight(), s.getRepetitions(), s.getSets(), s.getType());
+      DBConnector.makeStatement("INSERT INTO kondisjonStyrkeOevelse(oevelseNavn,belastning,reps,sets,oevelseTyp) " + v3 + ";");
+    }
+  }
 
+  public static boolean containsWorkout(String name) {
+    try {
+      ResultSet rs = DBConnector.makeQuery("SELECT * FROM treningsOekt WHERE oektNavn='" + name + "';").getResultSet();
+      if (!rs.isBeforeFirst()) {
+        return false;
+      }
+      return true;
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return true;
+  }
+
+  public static boolean containsExercise(String name) {
+    try {
+      ResultSet rs = DBConnector.makeQuery("SELECT * FROM oevelse WHERE oevelseNavn='" + name + "';").getResultSet();
+      if (!rs.isBeforeFirst()) {
+        return false;
+      }
+      return true;
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return true;
+  }
+
+  public static boolean workoutContainExercise(Workout workout, Exercise exercise) {
+    try {
+      ResultSet rs = DBConnector.makeQuery(String.format("SELECT * FROM oevelser WHERE oevelseNavn='%s' AND oektNavn='%s';", exercise.NAME, workout.NAME)).getResultSet();
+      if (!rs.isBeforeFirst()) {
+        return false;
+      }
+      return true;
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return true;
+  }
+
+  public static void addWorkout(Workout workout, User user) {
+    String v1 = "values(" + user.NR + ",'" + workout.NAME + "'," + workout.getDate() + "," + workout.getTime() + "," + workout.getDuration() + ")";
+    DBConnector.makeStatement("INSERT INTO treningsOekt(personNr, oektNavn, dato, tidspunkt, varighhet) " + v1 + ";");
+    if (workout instanceof Indoor) {
+      String v2 = "values('" + workout.NAME + "'," + ((Indoor) workout).getSpectators() + ")";
+      DBConnector.makeStatement("INSERT INTO innendoersOekt(oektNavn, tilskuerer) " + v2 + ";");
+    } else {
+      String v3 = "values('" + workout.NAME + "','" + ((Outdoor) workout).getWeather() + "'," + ((Outdoor) workout).getTemp() + ")";
+      DBConnector.makeStatement("INSERT INTO utendoersOekt(oektNavn, vaerforhold, temperatur) " + v3 + ";");
+    }
+  }
+
+  public static void addExerciseToWorkout(Workout workout, Exercise exercise) {
+    if (!workoutContainExercise(workout, exercise)) {
+      String v1 = String.format("values('%s','%s')", exercise.NAME, workout.NAME);
+      DBConnector.makeStatement("INSERT INTO oevelser(oevelseNavn,oektNavn) " + v1 + ";");
+    }
+  }
+
+  public static List<Stamina> getStaminaExercises() {
+    List<Stamina> exercises = new ArrayList<>();
+    try {
+      ResultSet rs = DBConnector.makeQuery("SELECT * FROM oevelse JOIN utholdenhetOevelse ON oevelse.oevelseNavn=utholdenhetOevelse.oevelseNavn;").getResultSet();
+      while (rs.next()) {
+        Stamina stamina = new Stamina(rs.getString("oevelseNavn"), rs.getInt("distanse"), rs.getInt("tid"));
+        exercises.add(stamina);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return exercises;
+  }
+
+  public static List<Strength> getStrenghtExercises() {
+    List<Strength> exercises = new ArrayList<>();
+    try {
+      ResultSet rs = DBConnector.makeQuery("SELECT * FROM oevelse JOIN kondisjonStyrkeOevelse ON oevelse.oevelseNavn=kondisjonStyrkeOevelse.oevelseNavn;").getResultSet();
+      while (rs.next()) {
+        Strength strength = new Strength(rs.getString("oevelseNavn"), rs.getString("oevelseTyp"), rs.getInt("belastning"), rs.getInt("reps"), rs.getInt("sets"));
+        exercises.add(strength);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return exercises;
+  }
+
+  public static List<Workout> getLastWeekWorkouts() {
+    List<Workout> workouts = new ArrayList<>();
+    //Date currentDate = new Date();
+    LocalDateTime currentDate = LocalDateTime.now();
+    LocalDateTime lastWeekDate = currentDate.minusDays(7);
+    int cDate = Integer.parseInt(String.format("%04d%02d%02d", currentDate.getYear(), currentDate.getMonth().getValue(), currentDate.getDayOfMonth()));
+    int wDate = Integer.parseInt(String.format("%04d%02d%02d", lastWeekDate.getYear(), lastWeekDate.getMonth().getValue(), lastWeekDate.getDayOfMonth()));
+    try {
+      ResultSet rs = DBConnector.makeQuery("SELECT * FROM treningsOekt;").getResultSet();
+      while (rs.next()) {
+        String name = rs.getString("oektNavn");
+        int oDate = rs.getInt("dato");
+        int time = rs.getInt("tidspunkt");
+        int duration = rs.getInt("varighhet");
+        if (oDate > wDate && oDate < cDate) {
+          Workout workout = new Workout(name, oDate, time, duration, getExerciseInWorkout(name));
+          workouts.add(workout);
+        }
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return workouts;
+  }
+
+  public static List<String> getExerciseInWorkout(String workoutName) {
+    List<String> exercises = new ArrayList<>();
+    try {
+      ResultSet rs = DBConnector.makeQuery("SELECT oevelseNavn FROM oevelser WHERE oektNavn='" + workoutName + "';").getResultSet();
+      while (rs.next()) {
+        exercises.add(getExercise(rs.getString("oevelseNavn")).NAME);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return exercises;
+  }
+
+  public static Exercise getExercise(String name) {
+    Exercise exercise;
+    try {
+      ResultSet rs = DBConnector.makeQuery("SELECT * FROM oevelse JOIN utholdenhetOevelse ON oevelse.oevelseNavn=utholdenhetOevelse.oevelseNavn WHERE oevelse.oevelseNavn='" + name + "';").getResultSet();
+      if (!rs.isBeforeFirst()) {
+        rs = DBConnector.makeQuery("SELECT * FROM oevelse JOIN kondisjonStyrkeOevelse ON oevelse.oevelseNavn=kondisjonStyrkeOevelse.oevelseNavn WHERE oevelse.oevelseNavn='" + name + "';").getResultSet();
+        rs.next();
+        exercise = new Strength(rs.getString("oevelseNavn"), rs.getString("oevelseTyp"), rs.getInt("belastning"), rs.getInt("reps"), rs.getInt("sets"));
+        return exercise;
+      }
+      rs.next();
+      exercise = new Stamina(rs.getString("oevelseNavn"), rs.getInt("distanse"), rs.getInt("tid"));
+      return exercise;
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
 }
