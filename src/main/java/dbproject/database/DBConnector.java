@@ -12,9 +12,9 @@ public class DBConnector {
      * @return a connection or null if no connection was established.
      */
     public static Connection getConnection() {
-        String url = "jdbc:mysql://mysql.stud.ntnu.no/jonashm_datab";
-        String username = "";
-        String password = "";
+        String url = "jdbc:mysql://mysql.stud.ntnu.no/vesteind_db";
+        String username = "vesteind_db_user";
+        String password = "hundene";
         try {
             Connection connection = DriverManager.getConnection(url, username, password);
             return connection;
