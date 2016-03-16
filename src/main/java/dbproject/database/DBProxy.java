@@ -235,4 +235,17 @@ public class DBProxy {
     return null;
   }
 
+  public static List<Exercise> getTenLongestStaminaExercises() {
+    List<Exercise> exercises = new ArrayList<>();
+    try {
+      ResultSet rs = DBConnector.makeQuery("SELECT * FROM oevelse JOIN utholdenhetOevelse ON oevelse.oevelseNavn = utholdenhetOevelse.oevelseNavn ORDER BY distanse DESC LIMIT 10;").getResultSet();
+      while (rs.next()) {
+        exercises.add(getExercise(rs.getString("oevelseNavn")));
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return exercises;
+  }
+
 }

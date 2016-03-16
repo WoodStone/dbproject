@@ -7,9 +7,7 @@ import dbproject.core.exercise.Strength;
 import dbproject.database.DBProxy;
 
 import java.util.ArrayList;
-import java.util.InputMismatchException;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Created by Vestein on 15.03.2016.
@@ -42,8 +40,6 @@ public class Workout {
   }
 
   public void addExercises() {
-    //TODO
-    Scanner scanner = new Scanner(System.in);
     while (true) {
       String resp = Util.getStringInput("Legge til øvelser? (y/n)", "Ugyldig input");
       if (resp.equals("y")) {
@@ -62,7 +58,7 @@ public class Workout {
         }
         System.out.println("Styrkeøvelser:");
         for (Exercise exercise : strengthExercises) {
-          System.out.print(String.format("%d: %s, ", strengthExercises.indexOf(exercise) + staminaExercises.size() + modifier, exercise.NAME));
+          System.out.print(String.format("%d: %s, ", strengthExercises.indexOf(exercise) + staminaExercises.size(), exercise.NAME));
           if (staminaExercises.indexOf(exercise) + 1 % 5 == 0) {
             System.out.println();
           }
@@ -85,7 +81,7 @@ public class Workout {
               if (index < staminaExercises.size()) {
                 DBProxy.addExerciseToWorkout(this, staminaExercises.get(index));
               } else {
-                DBProxy.addExerciseToWorkout(this, strengthExercises.get(index - staminaExercises.size() + modifier));
+                DBProxy.addExerciseToWorkout(this, strengthExercises.get(index - staminaExercises.size() - modifier));
               }
             } catch (NumberFormatException | IndexOutOfBoundsException e) {
               if (added.size() > 0) {
@@ -113,17 +109,7 @@ public class Workout {
   }
 
   public void setDate() {
-    Scanner scanner = new Scanner(System.in);
-    while (true) {
-      System.out.print("Dato (20160113): ");
-      try {
-        int input = scanner.nextInt();
-        date = input;
-        break;
-      } catch (InputMismatchException e) {
-        System.out.println("Ugyldig dato");
-      }
-    }
+    date = Util.getIntInput("Dato (20160113)", "Ugyldig dato");
   }
 
   public int getDate() {
@@ -131,17 +117,7 @@ public class Workout {
   }
 
   public void setTime() {
-    Scanner scanner = new Scanner(System.in);
-    while (true) {
-      System.out.print("Tidspunkt (1200): ");
-      try {
-        int input = scanner.nextInt();
-        time = input;
-        break;
-      } catch (InputMismatchException e) {
-        System.out.println("Ugyldig tidspunkt");
-      }
-    }
+    time = Util.getIntInput("Tidspunkt (1200)", "Ugyldig tidspunkt");
   }
 
   public int getTime() {
@@ -149,17 +125,7 @@ public class Workout {
   }
 
   public void setDuration() {
-    Scanner scanner = new Scanner(System.in);
-    while (true) {
-      System.out.print("Varighet i minutter (45): ");
-      try {
-        int input = scanner.nextInt();
-        duration = input;
-        break;
-      } catch (InputMismatchException e) {
-        System.out.println("Ugyldig varighet");
-      }
-    }
+    duration = Util.getIntInput("Varighet i minutter (45)", "Ugyldig input");
   }
 
   public int getDuration() {

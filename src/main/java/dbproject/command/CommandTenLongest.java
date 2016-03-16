@@ -6,7 +6,6 @@ import dbproject.core.exercise.Stamina;
 import dbproject.database.DBProxy;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -26,7 +25,7 @@ public class CommandTenLongest extends CommandBase {
 
   @Override
   public void processCommand(List<String> args) {
-    List<Exercise> exercises = DBProxy.getExercises();
+    List<Exercise> exercises = DBProxy.getTenLongestStaminaExercises();
     List<Stamina> staminaList = new ArrayList<>();
 
     for (Exercise exercise : exercises) {
@@ -34,20 +33,6 @@ public class CommandTenLongest extends CommandBase {
         staminaList.add((Stamina) exercise);
       }
     }
-
-    staminaList.sort(new Comparator<Stamina>() {
-      @Override
-      public int compare(Stamina o1, Stamina o2) {
-        if (o1.getLength() < o2.getLength()) {
-          return 1;
-        } else if (o1.getLength() == o2.getLength()) {
-          return 0;
-        }
-        return -1;
-      }
-    });
-
-    staminaList = staminaList.subList(0, staminaList.size() < 10 ? staminaList.size() - 1 : 9);
 
     System.out.println("10 lengste utholdenhetsøvelser:");
     for (Stamina stamina : staminaList) {
