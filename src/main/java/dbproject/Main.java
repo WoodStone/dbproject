@@ -45,6 +45,7 @@ public class Main {
     commandHandler.registerCommand(new CommandWorkout());
     commandHandler.registerCommand(new CommandExercise());
     commandHandler.registerCommand(new CommandLastWeek());
+    commandHandler.registerCommand(new CommandTenLongest());
   }
 
   public static void init() {

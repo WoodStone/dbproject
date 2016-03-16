@@ -203,6 +203,19 @@ public class DBProxy {
     return exercises;
   }
 
+  public static List<Exercise> getExercises() {
+    List<Exercise> exercises = new ArrayList<>();
+    try {
+      ResultSet rs = DBConnector.makeQuery("SELECT * FROM oevelse").getResultSet();
+      while (rs.next()) {
+        exercises.add(getExercise(rs.getString("oevelseNavn")));
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return exercises;
+  }
+
   public static Exercise getExercise(String name) {
     Exercise exercise;
     try {
