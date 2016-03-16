@@ -1,6 +1,6 @@
 package dbproject.database;
 
-import dbproject.User;
+import dbproject.core.User;
 import dbproject.core.exercise.Exercise;
 import dbproject.core.exercise.Stamina;
 import dbproject.core.exercise.Strength;
@@ -166,7 +166,6 @@ public class DBProxy {
 
   public static List<Workout> getLastWeekWorkouts() {
     List<Workout> workouts = new ArrayList<>();
-    //Date currentDate = new Date();
     LocalDateTime currentDate = LocalDateTime.now();
     LocalDateTime lastWeekDate = currentDate.minusDays(7);
     int cDate = Integer.parseInt(String.format("%04d%02d%02d", currentDate.getYear(), currentDate.getMonth().getValue(), currentDate.getDayOfMonth()));

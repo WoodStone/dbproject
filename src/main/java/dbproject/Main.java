@@ -1,6 +1,7 @@
 package dbproject;
 
 import dbproject.command.*;
+import dbproject.core.User;
 import dbproject.database.DBProxy;
 
 import java.util.Scanner;

@@ -1,7 +1,7 @@
 package dbproject.command;
 
 import dbproject.Main;
-import dbproject.User;
+import dbproject.core.User;
 import dbproject.command.core.CommandBase;
 import dbproject.database.DBProxy;
 
@@ -24,7 +24,6 @@ public class CommandLogin extends CommandBase {
     //TODO login
     User user = DBProxy.isValidUser(args.get(0));
     if (user != null) {
-      Main.loggedin = true;
       Main.user = user;
       System.out.println("Logged in! :O");
     }

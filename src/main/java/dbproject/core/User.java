@@ -1,4 +1,4 @@
-package dbproject;
+package dbproject.core;
 
 public class User {
 
